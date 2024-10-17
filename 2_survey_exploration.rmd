@@ -89,7 +89,10 @@ Students had initially expressed their height in either imperial or metric units
 NOTE: This one is a bit of a challenge. You may want to check out the `case_when()` function.
 
 ```{r}
-case_when()
+new <- survey %>% 
+  mutate(Height_original = case_when(M.I == "Imperial" ~ Height*0.393701,
+                                     M.I == "Metric" ~ Height) )
+
 
 ```
 
