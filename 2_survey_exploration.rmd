@@ -101,7 +101,8 @@ new <- survey %>%
 Create a table that shows the mean and standard deviation of height - in centimeters for students who used metric units, and in inches for students who used imperial units. Use kable() to insert a nicely formatted table into your R Markdown document.
 
 ```{r}
-
+new_sd <- new %>% 
+  select(Height, )
 ```
 
 
