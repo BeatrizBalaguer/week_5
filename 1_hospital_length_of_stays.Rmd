@@ -1,0 +1,110 @@
+---
+title: "Hospital Length of Stays"
+author: "Keith Douglas"
+date: "2024-10-15"
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(NHSRdatasets)
+library(knitr)
+library(kableExtra)
+
+```
+
+# Load the data from the package
+```{r}
+data("LOS_model")
+```
+
+# Inspect
+```{r}
+
+str(LOS_model)
+head(LOS_model)
+
+```
+
+
+# Make Death a factor
+```{r}
+hospital_data <- LOS_model %>% 
+  mutate(Death = factor(Death))
+
+head(hospital_data)
+```
+
+
+# Recode Death levels
+```{r}
+#Instead of 0s and 1s, died or survived.
+hospital_data <-  hospital_data %>% 
+  mutate(Death = Death %>% 
+           fct_recode("Survived" = "0",
+                      "Died" = "1"))
+head(hospital_data)  
+
+```
+
+
+# Create a summary table where each combination of Organisation and Death gets a count (n).
+```{r}
+hosp_summary <-  hospital_data %>% 
+  group_by(Organisation, Death) %>% 
+  tally()
+
+```
+
+# Make a wide table with Dead and Survived as rows with a column for each Trust
+```{r}
+hosp_data_wide <- hosp_summary %>% 
+  pivot_wider(
+    names_from = Organisation,
+    values_from = n
+  )
+```
+
+# Another pivot with Survived and Died as columns, Trusts as rows.
+# Also calculate the % survived for each Trust
+```{r}
+hosp_pretty <-  hosp_summary %>%
+  pivot_wider(
+    names_from = Death,
+    values_from = n
+  ) %>% 
+  mutate(Total = Survived + Died,
+         Percent_Survived = (Survived/Total)*100)
+```
+
+
+# Make the wide table pretty with kable(), col.names to change the name of the columns, digits to round the percentages, caption to put a title, align, lcccc = aligns to the middle.  
+```{r}
+hosp_pretty %>% 
+  kable(
+    col.names = c("Trust" , "Surivived", "Died", "Total", "Percent Survived"),
+    digits = 0,
+    caption = "Hospital Length of Stays data: Percent Survived by Trust",
+    align = "lcccc"
+  ) 
+
+
+#  ##this below is from kableExtra package, problems with knitting it with pdf (so I commented them out)
+#  kable_styling("striped", full_width = FALSE) %>% 
+# footnote("Data from LOS model")
+
+
+```
+
+
+# Let's knit to PDF
+
+
